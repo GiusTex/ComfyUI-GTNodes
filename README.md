@@ -1,5 +1,7 @@
 # ComfyUI-MoreEfficientSamplers
-A couple more advanced samplers based on efficiency-nodes comfyui
+A couple more advanced samplers based on efficiency-nodes comfyui.
+
+For who wants more nodes packed together.
 
 ### Updates:
 - Added `Sampler Custom UltraAdvancedPlus (Efficient)`, more info below.
@@ -12,9 +14,13 @@ A simple edit of the native sampler custom to let it render a preview while stil
 
 <img width="333" height="615" alt="Sampler Custom Ultra Advanced (Eff)" src="https://github.com/user-attachments/assets/c2d84fe0-0ca4-49cf-8df2-afbfa3686f7e" />
 
-An edit of efficiency-nodes's ksampler adv. (eff) to let it accept custom samplers and schedulers (sigmas), very useful paired with the flowmatch scheduler, like [this](https://github.com/BigStationW/flowmatch_scheduler-comfyui), used with video models and lightx loras.
+- An edit of efficiency-nodes's ksampler adv. (eff.) to let it accept custom samplers and schedulers (sigmas), very useful when paired with the `flowmatch scheduler`, from [here](https://github.com/BigStationW/flowmatch_scheduler-comfyui), useful with video models using lightx loras.
+- It can also slice internally the sigmas if you use a refiner (example: first 4 steps, 4 sigmas; 2 steps later for the refiner, last 2 sigmas), without the need for an external node (like comfyui `split sigmas` node).
 
-- `Sampler Custom UltraAdvancedPlus (Efficient)`: same as the `UltraAdvanced` except it accepts a guider too. Thought for my [ttm custom node](https://github.com/GiusTex/ComfyUI-Wan-TimeToMove), but you can use it for other sampling processes requiring a guider.
+<img width="286" height="495" alt="Sampler Custom UltraAdvancedPlus Efficient" src="https://github.com/user-attachments/assets/37d890ec-95ff-4b0f-bce5-8576a3742284" />
+
+- Same as the `UltraAdvanced` node except it accepts a guider too. Thought for my [ttm custom node](https://github.com/GiusTex/ComfyUI-Wan-TimeToMove), but you can use it for other sampling processes requiring a guider.
+- Like the above node, this too can slice internally the sigmas.
 
 ### Download
 To install ComfyUI-MoreEfficientSamplers, follow these steps:
