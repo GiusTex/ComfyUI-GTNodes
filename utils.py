@@ -121,3 +121,21 @@ def sample_custom_ultra(model, device, noise, sampler, positive, negative, cfg, 
                 return torch.zeros_like(noise)
 
     return sample(model, noise, positive, negative, cfg, device, sampler, sigmas, model_options, latent_image=latent_image, denoise_mask=denoise_mask, callback=callback, disable_pbar=disable_pbar, seed=seed)
+
+
+def sample_custom_ultra_plus(noise, sampler, guider, latent_image=None, start_step=None, last_step=None, force_full_denoise=False, denoise_mask=None, sigmas=None, callback=None, disable_pbar=False, seed=None):
+    if last_step is not None and last_step < (len(sigmas) - 1):
+        sigmas = sigmas[:last_step + 1]
+        if force_full_denoise:
+            sigmas[-1] = 0
+
+    if start_step is not None:
+        if start_step < (len(sigmas) - 1):
+            sigmas = sigmas[start_step:]
+        else:
+            if latent_image is not None:
+                return latent_image
+            else:
+                return torch.zeros_like(noise)
+    
+    return guider.sample(noise, latent_image, sampler, sigmas, denoise_mask, callback, disable_pbar, seed)
