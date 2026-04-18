@@ -4,6 +4,7 @@ from PIL import Image
 from nodes import VAEDecodeTiled, PreviewImage, VAEDecode, ConditioningZeroOut
 from comfy.samplers import SAMPLER_NAMES, CFGGuider, sampler_object
 from comfy_extras.nodes_custom_sampler import Noise_RandomNoise, Noise_EmptyNoise, SamplerCustomAdvanced
+from .guider import ScheduledCfgGuider, CFGFloatListScheduler
 
 from .utils import (pil2tensor, global_preview_method, warning, 
                    set_preview_method, store_ksampler_results, globals_cleanup)
@@ -154,8 +155,12 @@ class SamplerCustomAdvancedEfficient:
 
 NODE_CLASS_MAPPINGS = {
     "SamplerCustomAdvancedEfficient": SamplerCustomAdvancedEfficient,
+    "ScheduledCfgGuider": ScheduledCfgGuider,
+    "CFGFloatListScheduler": CFGFloatListScheduler,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "SamplerCustomAdvancedEfficient": "Sampler Custom Advanced (Efficient)",
+    "ScheduledCfgGuider": "Scheduled Cfg Guider",
+    "CFGFloatListScheduler": "CFG Float List Scheduler",
 }
