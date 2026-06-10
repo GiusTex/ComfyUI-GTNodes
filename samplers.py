@@ -119,7 +119,7 @@ class SamplerCustomAdvancedEfficient:
                 # Decode image if not yet decoded
                 if "true" in vae_decode:
                     if images is None:
-                        images = vae_decode_latent(vae, latent, vae_decode)
+                        images = vae_decode_latent(vae, denoised_latent, vae_decode)
                         # Store decoded image as base image of no script is detected
                         store_ksampler_results("image", my_unique_id, images)
 
