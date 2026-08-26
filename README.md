@@ -1,5 +1,5 @@
-# ComfyUI-MoreEfficientSamplers
-A ksampler inspired by efficiency-nodes comfyui bundling some native nodes.
+# GT-Nodes
+A bundle of nodes with different purposes. More info below.
 
 ### Updates:
 - Updated `SamplerCustomAdvancedEfficient` to work through comfyui `Sampler Custom Advanced` to support LTXV combined latent and future comfyui updates.
