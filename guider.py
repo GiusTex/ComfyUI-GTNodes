@@ -1,41 +1,13 @@
 import comfy
 import torch
-from comfy.model_patcher import ModelPatcher
-from comfy.samplers import (sampling_function, process_conds, cast_to_load_options,
-                            preprocess_conds_hooks, get_total_hook_groups_in_conds,
-                            filter_registered_hooks_on_conds)
+
+from comfy.samplers import CFGGuider, sampling_function, process_conds
 
 
 # Custom Guider, made for Time-To-Move, that accepts a list of cfg values too (cfg values part taken from Kijai WanVideo-Wrapper)
-class ScheduledCfgGuiderClass:
-    def __init__(self, model_patcher: ModelPatcher):
-        self.model_patcher = model_patcher
-        self.model_options = model_patcher.model_options
-        self.original_conds = {}
-        self.cfg = 1.0
-
-    def set_conds(self, positive, negative):
-        self.inner_set_conds({"positive": positive, "negative": negative})
-
-    def set_cfg(self, cfg):
-        self.cfg = cfg
-    
+class ScheduledCfgGuiderClass(CFGGuider):
     def set_ttm_options(self, ttm_options):
         self.start_sampler_step = ttm_options["start_sampler_step"]
-
-    def inner_set_conds(self, conds):
-        for k in conds:
-            self.original_conds[k] = comfy.sampler_helpers.convert_cond(conds[k])
-
-    def __call__(self, *args, **kwargs):
-        return self.outer_predict_noise(*args, **kwargs)
-
-    def outer_predict_noise(self, x, timestep, model_options={}, seed=None):
-        return comfy.patcher_extension.WrapperExecutor.new_class_executor(
-            self.predict_noise,
-            self,
-            comfy.patcher_extension.get_all_wrappers(comfy.patcher_extension.WrappersMP.PREDICT_NOISE, self.model_options, is_model_options=True)
-        ).execute(x, timestep, model_options, seed)
 
     def predict_noise(self, x, timestep, model_options={}, seed=None):
         #---------------------------------------------------------
@@ -94,88 +66,8 @@ class ScheduledCfgGuiderClass:
         
         return self.inner_model.process_latent_out(samples.to(torch.float32))
 
-    def outer_sample(self, noise, latent_image, sampler, sigmas, denoise_mask=None, callback=None, disable_pbar=False, seed=None, latent_shapes=None):
-        self.inner_model, self.conds, self.loaded_models = comfy.sampler_helpers.prepare_sampling(self.model_patcher, noise.shape, self.conds, self.model_options)
-        device = self.model_patcher.load_device
 
-        noise = noise.to(device)
-        latent_image = latent_image.to(device)
-        sigmas = sigmas.to(device)
-        cast_to_load_options(self.model_options, device=device, dtype=self.model_patcher.model_dtype())
-
-        try:
-            self.model_patcher.pre_run()
-            output = self.inner_sample(noise, latent_image, device, sampler, sigmas, denoise_mask, callback, disable_pbar, seed, latent_shapes=latent_shapes)
-        finally:
-            self.model_patcher.cleanup()
-
-        comfy.sampler_helpers.cleanup_models(self.conds, self.loaded_models)
-        del self.inner_model
-        del self.loaded_models
-        return output
-
-    def sample(self, noise, latent_image, sampler, sigmas, denoise_mask=None, callback=None, disable_pbar=False, seed=None):
-        if sigmas.shape[-1] == 0:
-            return latent_image
-
-        if latent_image.is_nested:
-            latent_image, latent_shapes = comfy.utils.pack_latents(latent_image.unbind())
-            noise, _ = comfy.utils.pack_latents(noise.unbind())
-        else:
-            latent_shapes = [latent_image.shape]
-
-        if denoise_mask is not None:
-            if denoise_mask.is_nested:
-                denoise_masks = denoise_mask.unbind()
-                denoise_masks = denoise_masks[:len(latent_shapes)]
-            else:
-                denoise_masks = [denoise_mask]
-
-            for i in range(len(denoise_masks), len(latent_shapes)):
-                denoise_masks.append(torch.ones(latent_shapes[i]))
-
-            for i in range(len(denoise_masks)):
-                denoise_masks[i] = comfy.sampler_helpers.prepare_mask(denoise_masks[i], latent_shapes[i], self.model_patcher.load_device)
-
-            if len(denoise_masks) > 1:
-                denoise_mask, _ = comfy.utils.pack_latents(denoise_masks)
-            else:
-                denoise_mask = denoise_masks[0]
-
-        self.conds = {}
-        for k in self.original_conds:
-            self.conds[k] = list(map(lambda a: a.copy(), self.original_conds[k]))
-        preprocess_conds_hooks(self.conds)
-
-        try:
-            orig_model_options = self.model_options
-            self.model_options = comfy.model_patcher.create_model_options_clone(self.model_options)
-            # if one hook type (or just None), then don't bother caching weights for hooks (will never change after first step)
-            orig_hook_mode = self.model_patcher.hook_mode
-            if get_total_hook_groups_in_conds(self.conds) <= 1:
-                self.model_patcher.hook_mode = comfy.hooks.EnumHookMode.MinVram
-            comfy.sampler_helpers.prepare_model_patcher(self.model_patcher, self.conds, self.model_options)
-            filter_registered_hooks_on_conds(self.conds, self.model_options)
-            executor = comfy.patcher_extension.WrapperExecutor.new_class_executor(
-                self.outer_sample,
-                self,
-                comfy.patcher_extension.get_all_wrappers(comfy.patcher_extension.WrappersMP.OUTER_SAMPLE, self.model_options, is_model_options=True)
-            )
-            output = executor.execute(noise, latent_image, sampler, sigmas, denoise_mask, callback, disable_pbar, seed, latent_shapes=latent_shapes)
-        finally:
-            cast_to_load_options(self.model_options, device=self.model_patcher.offload_device)
-            self.model_options = orig_model_options
-            self.model_patcher.hook_mode = orig_hook_mode
-            self.model_patcher.restore_hook_patches()
-
-        del self.conds
-
-        if len(latent_shapes) > 1:
-            output = comfy.nested_tensor.NestedTensor(comfy.utils.unpack_latents(output, latent_shapes))
-        return output
-
-
-class ScheduledCfgGuider:    
+class ScheduledCfgGuider:
     @classmethod
     def INPUT_TYPES(s):
         return {"required":
@@ -187,11 +79,12 @@ class ScheduledCfgGuider:
                     },
                 }
 
+    DEPRECATED = True
     RETURN_TYPES = ("GUIDER",)
     RETURN_NAMES = ("guider",)
     FUNCTION = "guide"
     CATEGORY = "More Efficient Samplers"
-    DESCRIPTION = "A guider that accepts also a list of cfg values, useful if you want to give at the first step higher ones."
+    DESCRIPTION = "Deprecated, it still works but it's better if you use comfyui \"CFG Override\" node.\m\"Scheduled Cfg Guider\": A guider that accepts also a list of cfg values, useful if you want to give at the first step higher ones."
 
     def guide(cls, model, positive, negative, cfg, start_sampler_step):
         guider = ScheduledCfgGuiderClass(model)
