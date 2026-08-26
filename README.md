@@ -1,4 +1,4 @@
-# ComfyUI-GTNodes
+# GTNodes for ComfyUI
 A bundle of nodes with different purposes. More info below.
 
 ### Updates:
