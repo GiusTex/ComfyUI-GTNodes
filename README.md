@@ -24,6 +24,7 @@ Supports:
 - internal slicing of the sigmas, useful for multi-stage sampling;
 - use of only positive, useful when sampling with cfg 1 and/or the negative isn't required;
 - use of optional custom samplers, schedulers and guiders. Connect and use them, or bypass/leave their input slots empty to use the corresponding default widgets. Default guiders: `CFG Guider` when `use_cfg` is `True`, Basic Guider when false.
+- Decoding of images/audio, when one or both are available (the node auto-checks whats available in the latent).
 
 **Scheduled CFG Guider** (with its **CFG Float List Scheduler**):
 
