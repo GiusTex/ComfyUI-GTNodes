@@ -1,17 +1,10 @@
 import torch
-import numpy as np
 import latent_preview
-from PIL import Image
 
 from comfy.cli_args import args
 from comfy.samplers import sample
 
 WARNING_COLOR = "\033[93m"  # Yellow
-
-
-# Convert PIL to Tensor (grabbed from WAS Suite)
-def pil2tensor(image: Image.Image) -> torch.Tensor:
-    return torch.from_numpy(np.array(image).astype(np.float32) / 255.0).unsqueeze(0)
 
 
 # Extract global preview_method
