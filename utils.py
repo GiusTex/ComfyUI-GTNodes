@@ -50,25 +50,6 @@ last_helds = {
 }
 
 
-def store_ksampler_results(key: str, my_unique_id, value, parameters_list=None):
-    global last_helds
-
-    for i, data in enumerate(last_helds[key]):
-        id_ = data[-1]  # ID will always be the last in the tuple
-        if id_ == my_unique_id:
-            # Check if parameters_list is provided or not
-            updated_data = (value, parameters_list, id_) if parameters_list is not None else (value, id_)
-            last_helds[key][i] = updated_data
-            return True
-
-    # If parameters_list is given
-    if parameters_list is not None:
-        last_helds[key].append((value, parameters_list, my_unique_id))
-    else:
-        last_helds[key].append((value, my_unique_id))
-    return True
-
-
 # This function cleans global variables associated with nodes that are no longer detected on UI
 def globals_cleanup(prompt):
     global loaded_objects

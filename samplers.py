@@ -14,8 +14,7 @@ from comfy_extras.nodes_audio import VAEDecodeAudio, VAEDecodeAudioTiled, EmptyA
 
 from .guider import ScheduledCfgGuider, CFGFloatListScheduler
 
-from .utils import (global_preview_method, warning, 
-                   set_preview_method, store_ksampler_results, globals_cleanup)
+from .utils import global_preview_method, warning, set_preview_method, globals_cleanup
 
 
 class SamplerCustomAdvancedEfficient(io.ComfyNode):
@@ -188,16 +187,10 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
 
                 # ---------------------------------------------------------------------------------------------------------------
                 # Decode image/audio if not yet decoded
-                if "true" in vae_decode:
-                    if images is None:
-                        images = cls.video_vae_decode_latent(video_vae, denoised_latent, vae_decode)
-                        # Store decoded image as base image if no script is detected
-                        store_ksampler_results("image", cls.hidden.unique_id, images)
-                if "true" in audio_decode and denoised_latent["samples"].is_nested:
-                    if audio is None:
-                        audio = cls.audio_vae_decode_latent(audio_vae, denoised_latent, audio_decode)
-                        # Store decoded audio as base audio if no script is detected
-                        store_ksampler_results("audio", cls.hidden.unique_id, audio)
+                if "true" in vae_decode and images is None:
+                    images = cls.video_vae_decode_latent(video_vae, denoised_latent, vae_decode)
+                if "true" in audio_decode and denoised_latent["samples"].is_nested and audio is None:
+                    audio = cls.audio_vae_decode_latent(audio_vae, denoised_latent, audio_decode)
 
                 # Define preview images
                 if preview_method == "none" or (preview_method == "vae_decoded_only" and vae_decode == "false"):
