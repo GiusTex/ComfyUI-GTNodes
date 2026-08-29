@@ -29,7 +29,8 @@ Supports:
 **Scheduled CFG Guider** (with its **CFG Float List Scheduler**):
 
 <img width="378" height="221" alt="Scheduled Cfg Guider" src="https://github.com/user-attachments/assets/821528e5-49b3-4016-bce9-b6d49f885136" />
-- *Deprecated*, although they still work; I advice to use comfyui native `CFG Override`. Scheduled CFG Guider, anyway, let you decide what cfg to apply at each step through a list of floats connected to the cfg input. Based on kijai nodes.
+
+(*Deprecated*, although they still work; I advice to use comfyui's native `CFG Override`). Scheduled CFG Guider, anyway, let you decide what cfg to apply at each step through a list of floats connected to the cfg input. Based on kijai nodes.
 
 ### Suggested resources:
 - [`flowmatch scheduler`](https://github.com/BigStationW/flowmatch_scheduler-comfyui): useful with video models using lightx loras;
