@@ -71,9 +71,9 @@ class ScheduledCfgGuider:
     @classmethod
     def INPUT_TYPES(s):
         return {"required":
-                    {"model": ("MODEL", ),
-                    "positive": ("CONDITIONING", ),
-                    "negative": ("CONDITIONING", ),
+                    {"model": ("MODEL",),
+                    "positive": ("CONDITIONING",),
+                    "negative": ("CONDITIONING",),
                     "cfg": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.1, "tooltip": "Works with a list of floats too (one cfg float per step)"}),
                     "start_sampler_step": ("INT", {"default": 0, "min": 0, "max": 1000, "step": 1, "tooltip": "Start step of the whole sampling process. It will automatically skip the selected number of sigmas (starting from the first ones); if the sampler has a start_step option and you changed its value, set the same here"}),
                     },
@@ -83,8 +83,8 @@ class ScheduledCfgGuider:
     RETURN_TYPES = ("GUIDER",)
     RETURN_NAMES = ("guider",)
     FUNCTION = "guide"
-    CATEGORY = "More Efficient Samplers"
-    DESCRIPTION = "Deprecated, it still works but it's better if you use comfyui \"CFG Override\" node.\m\"Scheduled Cfg Guider\": A guider that accepts also a list of cfg values, useful if you want to give at the first step higher ones."
+    CATEGORY = "ComfyUI-GTNodes/guider"
+    DESCRIPTION = "Deprecated, it still works but it's better if you use comfyui \"CFG Override\" node.\n\"Scheduled Cfg Guider\": A guider that accepts also a list of cfg values, useful if you want to give at the first step higher ones."
 
     def guide(cls, model, positive, negative, cfg, start_sampler_step):
         guider = ScheduledCfgGuiderClass(model)
@@ -109,18 +109,15 @@ class CFGFloatListScheduler:
             "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "round": 0.01,"tooltip": "Start percent of the steps to apply cfg"}),
             "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "round": 0.01,"tooltip": "End percent of the steps to apply cfg"}),
             },
-            "hidden": {
-                "unique_id": "UNIQUE_ID",
-            },
         }
 
     RETURN_TYPES = ("FLOAT", )
-    RETURN_NAMES = ("float_list",)
+    RETURN_NAMES = ("float list",)
     FUNCTION = "process"
-    CATEGORY = "More Efficient Samplers"
+    CATEGORY = "ComfyUI-GTNodes/guider"
     DESCRIPTION = "Helper node to generate a list of floats that can be used to schedule cfg scale for the steps, outside the set range cfg is set to 1.0. Taken from Kijai WanVideo-Wrapper"
 
-    def process(self, steps, cfg_scale_start, cfg_scale_end, interpolation, start_percent, end_percent, unique_id):
+    def process(self, steps, cfg_scale_start, cfg_scale_end, interpolation, start_percent, end_percent):
 
         # Create a list of floats for the cfg schedule
         cfg_list = [1.0] * steps
@@ -150,3 +147,14 @@ class CFGFloatListScheduler:
             cfg_list[0] = 1.0
 
         return (cfg_list,)
+
+
+GUIDER_CLASS_MAPPINGS = {
+    "ScheduledCfgGuider": ScheduledCfgGuider,
+    "CFGFloatListScheduler": CFGFloatListScheduler,
+}
+
+GUIDER_NAME_MAPPINGS = {
+    "ScheduledCfgGuider": "Scheduled Cfg Guider",
+    "CFGFloatListScheduler": "CFG Float List Scheduler",
+}

@@ -12,9 +12,7 @@ from comfy_extras.nodes_custom_sampler import (Noise_RandomNoise, Noise_EmptyNoi
 
 from comfy_extras.nodes_audio import VAEDecodeAudio, VAEDecodeAudioTiled, EmptyAudio
 
-from .guider import ScheduledCfgGuider, CFGFloatListScheduler
-
-from .utils import global_preview_method, warning, set_preview_method, globals_cleanup
+from ..utils import global_preview_method, warning, set_preview_method, globals_cleanup
 
 
 class SamplerCustomAdvancedEfficient(io.ComfyNode):
@@ -41,7 +39,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
             node_id="SamplerCustomAdvancedEfficient",
             display_name="Sampler Custom Advanced (Efficient)",
             description="Advanced ksampler that combines together some nodes, uses DynamicCombo which requires ComfyUI 0.8.1 and frontend 1.33.4 or later",
-            category="More Efficient Samplers",
+            category="ComfyUI-GTNodes/samplers",
             inputs=[
                 io.Sigmas.Input("sigmas"),
                 io.Latent.Input("latent"),
@@ -224,14 +222,10 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
             return {"ui": preview, "result": result}
 
 
-NODE_CLASS_MAPPINGS = {
+SAMPLERS_CLASS_MAPPINGS = {
     "SamplerCustomAdvancedEfficient": SamplerCustomAdvancedEfficient,
-    "ScheduledCfgGuider": ScheduledCfgGuider,
-    "CFGFloatListScheduler": CFGFloatListScheduler,
 }
 
-NODE_DISPLAY_NAME_MAPPINGS = {
+SAMPLERS_NAME_MAPPINGS = {
     "SamplerCustomAdvancedEfficient": "Sampler Custom Advanced (Efficient)",
-    "ScheduledCfgGuider": "Scheduled Cfg Guider",
-    "CFGFloatListScheduler": "CFG Float List Scheduler",
 }
