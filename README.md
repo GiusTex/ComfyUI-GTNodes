@@ -21,7 +21,7 @@ To install ComfyUI-GTNodes, follow these steps:
 <img width="209" height="139" alt="Multi Lora Loader" src="https://github.com/user-attachments/assets/8f33a184-d276-49f3-ad15-8a4f58e959ea" />
 
 - A simple wrapper around comfyui's `Load Lora` node to load multiple LoRAs.
-- **Warning!**: changing number of loras resets the values, I suggest to start with number of loras: 3-4 and leave `None` the unused slots.
+- **Warning!**: changing number of loras resets the values, I suggest to start with number of loras: 3-4 and leave `None` in the unused slots.
 - As mentioned above, widgets with `None` are skipped.
 
 **Multi Lora Loader Advanced**
@@ -31,7 +31,7 @@ To install ComfyUI-GTNodes, follow these steps:
 - A wrapper around `Multi Lora Loader` and a simpler version of [`ComfyUI-SigmaSync-LoRA`](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA), to specify just when to start or end the use of each lora.
 - Leave `end_at_step`: `-1` to apply the lora's strength until the last step.
 - The sigmas required are the same ones you pass to `SamplerCustomAdvanced`.
-- As for `Multi Lora Loader`, widgets with `None` are skipped.
+- As for `Multi Lora Loader`, widgets with `None` are skipped, and changing number of loras **resets the values**. I suggest to start with number of loras: 3 and leave `None` in the unused slots.
 
 _How it works_:
 
