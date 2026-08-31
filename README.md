@@ -13,6 +13,7 @@ A bundle of nodes with different purposes. More info below.
 ### Download
 To install ComfyUI-GTNodes, follow these steps:
 - Go in the ComfyUI `custom_nodes` folder, then download the repository or clone it here: `git clone https://github.com/GiusTex/ComfyUI-GTNodes`.
+- Optional: install [ComfyUI-SigmaSync](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA#installation) if you want to use `Multi Lora Loader Advanced`.
 - Restart ComfyUI.
 
 ### Nodes:
@@ -28,7 +29,7 @@ To install ComfyUI-GTNodes, follow these steps:
 
 <img width="747" height="243" alt="Multi Lora Loader Advanced" src="https://github.com/user-attachments/assets/dd658b8b-d4c7-4538-9845-bd9d1f3debcb" />
 
-- A wrapper around `Multi Lora Loader` and a simpler version of [`ComfyUI-SigmaSync-LoRA`](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA), to specify just when to start or end the use of each lora.
+- A wrapper around `Multi Lora Loader` and a simpler version of [`ComfyUI-SigmaSync-LoRA`](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA#installation), to specify just when to start or end the use of each lora. As you may imagine, the node requires [ComfyUI-SigmaSync](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA#installation).
 - Leave `end_at_step`: `-1` to apply the lora's strength until the last step.
 - The sigmas required are the same ones you pass to `SamplerCustomAdvanced`.
 - As for `Multi Lora Loader`, widgets with `None` are skipped, and changing number of loras **resets the values**. I suggest to start with number of loras: 3 and leave `None` in the unused slots.
