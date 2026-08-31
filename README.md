@@ -1,5 +1,5 @@
 # GTNodes for ComfyUI
-A bundle of nodes with different purposes. More info below.
+A bundle of nodes with different purposes. More info below. Some of those nodes (`SamplerCustomAdvancedEfficient`, `MultiLoraLoader`, ...) exist as an alternative to comfyui's subgraphs, where sometimes the widget values are not passed correctly inside.
 
 ### Updates:
 - 31/08/2026: Added `MultiLoraLoader` and `MultiLoraLoaderAdvanced`.
