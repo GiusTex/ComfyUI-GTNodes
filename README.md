@@ -1,7 +1,8 @@
 # GTNodes for ComfyUI
-A bundle of nodes with different purposes. More info below. Some of those nodes (`SamplerCustomAdvancedEfficient`, `MultiLoraLoader`, ...) exist as an alternative to comfyui's subgraphs, where sometimes the widget values are not passed correctly inside.
+A bundle of nodes with different purposes. More info below. Some of those nodes (`SamplerCustomAdvancedEfficient`, `MultiLoraLoader`, ...) exist as an alternative to comfyui's subgraphs, where sometimes the widget values are not passed correctly inside. Some nodes use parts of other auhors nodes, more info below and in the credits.
 
 ### Updates:
+- 8/11/2026: Added `taeh3` preview method and `H3 Tiled Sampler Custom Advanced` node.
 - 31/08/2026: Added `MultiLoraLoader` and `MultiLoraLoaderAdvanced`.
 - 26/08/2026:
   - Updated `SamplerCustomAdvancedEfficient`: model input is now optional. Added audio decode option. Added option to disable cfg and negative inputs to slightly slim down the ui.
@@ -22,7 +23,7 @@ To install ComfyUI-GTNodes, follow these steps:
 <img width="209" height="139" alt="Multi Lora Loader" src="https://github.com/user-attachments/assets/8f33a184-d276-49f3-ad15-8a4f58e959ea" />
 
 - A simple wrapper around comfyui's `Load Lora` node to load multiple LoRAs.
-- **Warning!**: changing number of loras resets the values, I suggest to start with number of loras: 3-4 and leave `None` in the unused slots.
+- **Warning**: changing number of loras resets the values, I suggest to start with 3-4 loras and leave `None` in the unused slots.
 - As mentioned above, widgets with `None` are skipped.
 
 **Multi Lora Loader Advanced**
@@ -41,7 +42,7 @@ _How it works_:
 
 **Sampler Custom Advanced (Efficient)**:
 
-<img width="320" height="513" alt="SamplerCustomAdvancedEfficient_Updated" src="https://github.com/user-attachments/assets/e8016887-3070-440e-af65-9e038dbb2fc1" />
+<img width="255" height="707" alt="image" src="https://github.com/user-attachments/assets/c9226e2f-9a7f-4aea-a01e-f7d1201d92a2" />
 
 An edit of efficiency-nodes's `ksampler adv. (eff.)` to let it accept custom samplers, schedulers (sigmas) and guiders through comfyui `Sampler Custom Advanced` and other native nodes.
 Supports:
@@ -50,6 +51,14 @@ Supports:
 - use of optional custom samplers, schedulers and guiders. Connect and use them, or bypass/leave their input slots empty to use the corresponding default widgets. Default guiders: `CFG Guider` when `use_cfg` is `True`, `Basic Guider` when `False`.
 - Decoding of images/audio, when one or both are available (the node auto-checks whats available in the latent).
 
+**H3 Tiled Sampler Custom Advanced**:
+
+<img width="244" height="717" alt="image" src="https://github.com/user-attachments/assets/cb23a9f4-d301-4917-9f17-caee8a1bd2d5" />
+
+An edit of...
+
+- Text...
+
 **Scheduled CFG Guider** (with its **CFG Float List Scheduler**):
 
 <img width="378" height="221" alt="Scheduled Cfg Guider" src="https://github.com/user-attachments/assets/821528e5-49b3-4016-bce9-b6d49f885136" />
@@ -57,5 +66,11 @@ Supports:
 (*Deprecated*, although they still work; I advice to use comfyui's native `CFG Override`). Scheduled CFG Guider, anyway, let you decide what cfg to apply at each step through a list of floats connected to the cfg input. Based on kijai nodes.
 
 ### Suggested resources:
-- [`flowmatch scheduler`](https://github.com/BigStationW/flowmatch_scheduler-comfyui): useful with video models using lightx loras;
-- `ScheduledCfgGuider`: supports higher cfg values at first steps.
+[`flowmatch scheduler`](https://github.com/BigStationW/flowmatch_scheduler-comfyui): useful with video models using lightx loras.
+
+### Credits:
+- Efficient nodes...
+- was nodes suit...
+- jlucasmcrell/ComfyUI-H3-Multishot to build the taeh3 decoder (link: [`_build_decoder`](https://github.com/jlucasmcrell/ComfyUI-H3-Multishot/blob/d7d197709fc93c1afb125e3db1dfd4ac0ae28c60/h3_tae_decode.py#L20));
+- video-helper-suite...
+- Claude...
