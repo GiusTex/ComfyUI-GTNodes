@@ -13,7 +13,7 @@ _CACHE = {}
 MAX_RESOLUTION = 1024
 PREVIEW_CHUNK = 8
 
-# Taken from: https://github.com/jlucasmcrell/ComfyUI-H3-Multishot/blob/d7d197709fc93c1afb125e3db1dfd4ac0ae28c60/h3_tae_decode.py#L52
+# Taken from: https://github.com/jlucasmcrell/ComfyUI-H3-Multishot/blob/d7d197709fc93c1afb125e3db1dfd4ac0ae28c60/h3_tae_decode.py#L20
 def _build_decoder(sd):
     idxs = sorted({int(k.split(".")[0]) for k in sd})
     mods, last_was_stem = [], False
