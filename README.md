@@ -71,7 +71,7 @@ An edit of was-node-suite-comfyui's `H3 Tiled Sampler`, to let it accept custom 
 
 Requires an H3 latent dict (image/video + audio), and works both with a single image or a video, check `Sampler Custom Advanced (Efficient)` for more info.
 
-To use `taeh3` previouw method, as said in the previous node, kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) is required in `models/vae_approx`; more info on this and turning on animated video preview above.
+To use `taeh3` preview method, as said in the previous node, kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) is required in `models/vae_approx`; more info on this and turning on animated video preview above.
 
 This tiled sampler is useful if you upscaled an image/video, for example with the ComfyUI's native `MiniMax H3 Latent Upscale With Model` node (example upscale model in "Suggested resources"), the sampler then returns a dict, so you have to use `Separate AV Latent` node to get the video.
 
@@ -83,7 +83,7 @@ This tiled sampler is useful if you upscaled an image/video, for example with th
 
 ### Suggested resources:
 - [`flowmatch scheduler`](https://github.com/BigStationW/flowmatch_scheduler-comfyui): useful with video models using lightx loras;
-- [P-H3-Image-Comfy's vae](https://huggingface.co/PrunaAI/P-H3-Image-Comfy/blob/main/vae/p-h3-image_vae_int8_convrot.safetensors);
+- P-H3-Image-Comfy's [image vae](https://huggingface.co/PrunaAI/P-H3-Image-Comfy/blob/main/vae/p-h3-image_vae_int8_convrot.safetensors);
 - custom MiniMax H3 [image vae](https://huggingface.co/Mamad8/MiniMax-H3-Image-VAE/blob/main/minimax_h3_t1_image_vae_step1597.safetensors);
 - [minimax_h3_latent_upscaler_3d](https://huggingface.co/LBH-123-AI/Minimax_h3_latent_Upscaler/blob/09592c6221ec95cc8e0fae67842e34926c4e668b/minimax_h3_latent_upscaler_3d_bf16.safetensors).
 
