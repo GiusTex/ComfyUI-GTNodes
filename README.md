@@ -71,7 +71,7 @@ An edit of was-node-suite-comfyui's `H3 Tiled Sampler`, to let it accept custom 
 
 Requires an H3 latent dict (image/video + audio), and works both with a single image or a video, check `Sampler Custom Advanced (Efficient)` for more info.
 
-To use `taeh3` previouw method, as said in the previous node, kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) is required in `models/vae_approx`; more info above on this and "Display animated previews when sampling" (to turn on animated video preview).
+To use `taeh3` previouw method, as said in the previous node, kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) is required in `models/vae_approx`; more info on this and turning on animated video preview above.
 
 This tiled sampler is useful if you upscaled an image/video, for example with the ComfyUI's native `MiniMax H3 Latent Upscale With Model` node (example upscale model in "Suggested resources"), the sampler then returns a dict, so you have to use `Separate AV Latent` node to get the video.
 
