@@ -15,6 +15,8 @@ A bundle of nodes with different purposes. More info below. Some of those nodes 
 To install ComfyUI-GTNodes, follow these steps:
 - Go in the ComfyUI `custom_nodes` folder, then download the repository or clone it here: `git clone https://github.com/GiusTex/ComfyUI-GTNodes`.
 - Optional: install [ComfyUI-SigmaSync](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA#installation) if you want to use `Multi Lora Loader Advanced`.
+- Optional: download kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) in `models/vae_approx` to use `taeh3` single image preview method;
+- Optional: install Kosinkadink/[ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite) (+ kijai's taeh3 vae) to animate H3 video previews;
 - Restart ComfyUI.
 
 ### Nodes:
