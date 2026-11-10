@@ -2,6 +2,7 @@
 A bundle of nodes with different purposes. More info below. Some of those nodes (`SamplerCustomAdvancedEfficient`, `MultiLoraLoader`, ...) exist as an alternative to comfyui's subgraphs, where sometimes the widget values are not passed correctly inside. Some nodes use parts of other auhors nodes, more info below/in the credits.
 
 ### Updates:
+- 10/11/2026: Converted `H3 Tiled Sampler Custom Advanced` into `H3 Tiled Sampler Custom Advanced (Efficient)`.
 - 8/11/2026: Added `taeh3` preview method and `H3 Tiled Sampler Custom Advanced` node.
 - 31/08/2026: Added `MultiLoraLoader` and `MultiLoraLoaderAdvanced`.
 - 26/08/2026:
@@ -65,9 +66,9 @@ Supports:
   - video of 8 seconds, size of 448x704: the sampler stopped each step for 1.3 seconds;
   - video of 8 seconds, size of 576x832: the sampler stopped each step for 2.1 seconds.
 
-**H3 Tiled Sampler Custom Advanced**:
+**H3 Tiled Sampler Custom Advanced (Efficient)**:
 
-<img width="244" height="717" alt="image" src="https://github.com/user-attachments/assets/cb23a9f4-d301-4917-9f17-caee8a1bd2d5" />
+<img width="286" height="428" alt="image" src="https://github.com/user-attachments/assets/23982067-86a6-4677-9e2b-26705bdf85c5" />
 
 An edit of was-node-suite-comfyui's `H3 Tiled Sampler`, to let it accept custom sigmas, useful if you have lightx loras that require custom sigmas, like MiniMax H3 HyperFlow model/lora.
 
