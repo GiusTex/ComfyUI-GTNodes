@@ -278,7 +278,7 @@ class H3TiledSamplerCustomAdvanced(io.ComfyNode):
             else:
                 out_denoised = out
 
-            latent_to_use = check_sigmas(end_at_step, original_sigmas, out_denoised, latent)
+            latent_to_use = check_sigmas(end_at_step, original_sigmas, out_denoised, out)
             ui_obj = SamplerCustomAdvancedEfficient.define_preview(False, preview_method, latent_to_use, None)
 
         finally: # catch errors, exceptions etc
