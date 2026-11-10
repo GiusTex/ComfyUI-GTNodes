@@ -237,10 +237,13 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
     @classmethod
     def execute(cls, model, sigmas, seed, sampler, conditioning, latent, start_at_step, end_at_step, tile_width, tile_height, overlap, window_frames, window_overlap, preview_method, vae_decode, audio_decode, video_vae=(None), audio_vae=(None), custom_sampler=None):
         latent_dict = latent["samples"]
-        if latent_dict.is_nested:
-            latent_image = latent_dict.unbind()[0]
+        if model.model.diffusion_model.__class__.__name__ == "MiniMaxH3ImageModel":
+            latent_image = latent_dict
         else:
-            raise ValueError("[H3 Tiled Image Sampler] The latent is not nested, use \"Concat AV Latent\" node to pass a video/image + audio nested latent")
+            if latent_dict.is_nested:
+                latent_image = latent["samples"].unbind()[0]
+            else:
+                raise ValueError("[H3 Tiled Sampler] MiniMaxH3/P-H3-Image model detected, but the latent is not nested, use \"Concat AV Latent\" node to pass a video/image + audio nested latent. Or use MiniMaxH3-Image")
 
         # If vae is not connected, disable vae decoding
         if video_vae == (None,) and vae_decode != "false":
