@@ -177,14 +177,14 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
 
 
 # Based on was-node-suite H3TiledSampler
-class H3TiledSamplerCustomAdvanced(io.ComfyNode):
+class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
     """Denoise a MiniMax H3 latent as KSampler does, every model call run over overlapping tiles."""
 
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(
-            node_id="H3TiledSamplerCustomAdvanced",
-            display_name="H3 Tiled Sampler Custom Advanced",
+            node_id="H3TiledSamplerCustomAdvancedEfficient",
+            display_name="H3 Tiled Sampler Custom Advanced (Efficient)",
             category="ComfyUI-GTNodes/samplers",
             description=(
                 "Refine a long or upscaled MiniMax H3 clip with KSampler's settings, in overlapping tiles across the frame and windows along the clip that each fit the card, blended at every step into one clip. "
@@ -195,9 +195,12 @@ class H3TiledSamplerCustomAdvanced(io.ComfyNode):
                 io.Model.Input("model", tooltip="The MiniMax H3 model, after any LoRA."),
                 io.Sigmas.Input("sigmas"),
                 io.Int.Input("seed", default=0, min=0, max=0xFFFFFFFFFFFFFFFF, control_after_generate=True, tooltip="The noise seed, `0` as good as any."),
-                io.Sampler.Input("sampler"),
+                io.Combo.Input("sampler", options=SAMPLER_NAMES),
+                io.Sampler.Input("custom_sampler", optional=True),
                 io.Conditioning.Input("conditioning", tooltip="The clip's positive conditioning."),
                 io.Latent.Input("latent", tooltip="The H3 dict with upscaled vimage latent to refine + audio"),
+                io.Vae.Input("video_vae", optional=True, tooltip="Required only for previews with \"auto\" option and vae_decode"),
+                io.Vae.Input("audio_vae", optional=True, tooltip="Required only for vae_decode with models generating audio"),
                 io.Int.Input("start_at_step", default=0, min=0, max=10000),
                 io.Int.Input("end_at_step", default=10000, min=0, max=10000),
                 io.Int.Input("tile_width", default=576, min=64, max=16384, step=32, tooltip="Pixels a tile spans across the frame, as `576`."),
@@ -214,20 +217,38 @@ class H3TiledSamplerCustomAdvanced(io.ComfyNode):
                     "\"taeh3\" previews have been tested both with single image and video generation. Decode tests (on a rtx 3060 12gb):\n"
                     "- 8 seconds, 448x704: the sampler stopped each step for 1.3 seconds;\n"
                     "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds")),
+                io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
+                io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
             ],
             outputs=[
+                io.Model.Output(display_name="model"), 
+                io.Conditioning.Output(display_name="conditioning"),
+                io.Sampler.Output(display_name="sampler"),
+                io.Sigmas.Output(display_name="original sigmas"),
                 io.Latent.Output("latent", tooltip="The H3 dict with refined latent image + audio"),
-                io.Latent.Output(display_name="denoised latent", tooltip="The denoised H3 dict (if the sampling was stopped before the last sigma) with refined latent image + audio")
+                io.Latent.Output(display_name="denoised latent", tooltip="The denoised H3 dict (if the sampling was stopped before the last sigma) with refined latent image + audio"),
+                io.Image.Output(display_name="images"),
+                io.Audio.Output(display_name="audio"),
+                io.Vae.Output(display_name="video_vae"),
+                io.Vae.Output(display_name="audio_vae"),
             ],
         )
     
     @classmethod
-    def execute(cls, model, sigmas, seed, sampler, conditioning, latent, start_at_step, end_at_step, tile_width, tile_height, overlap, window_frames, window_overlap, preview_method):
+    def execute(cls, model, sigmas, seed, sampler, conditioning, latent, start_at_step, end_at_step, tile_width, tile_height, overlap, window_frames, window_overlap, preview_method, vae_decode, audio_decode, video_vae=(None), audio_vae=(None), custom_sampler=None):
         latent_dict = latent["samples"]
         if latent_dict.is_nested:
             latent_image = latent_dict.unbind()[0]
         else:
             raise ValueError("[H3 Tiled Image Sampler] The latent is not nested, use \"Concat AV Latent\" node to pass a video/image + audio nested latent")
+
+        # If vae is not connected, disable vae decoding
+        if video_vae == (None,) and vae_decode != "false":
+            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No video_vae input detected, proceeding as if vae_decode was false.\n")
+            vae_decode = "false"
+        if audio_vae == (None,) and audio_decode != "false":
+            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio_vae input detected, proceeding as if audio_decode was false.\n")
+            audio_decode = "false"
         
         starts = scene_starts(latent_image)
         settings = tiling_settings(tile_width, tile_height, overlap, window_frames, window_overlap)
@@ -244,8 +265,11 @@ class H3TiledSamplerCustomAdvanced(io.ComfyNode):
 
         guider=Guider_Basic(model)
         guider.set_conds(conditioning)
+        sampler = sampler_object(sampler) if custom_sampler is None else custom_sampler
 
         try:
+            # Initialize output variables
+            images = audio = previous_preview_method = None
             previous_preview_method = args.preview_method
             previous_previewer = latent_preview.get_previewer
 
@@ -279,7 +303,24 @@ class H3TiledSamplerCustomAdvanced(io.ComfyNode):
                 out_denoised = out
 
             latent_to_use = check_sigmas(end_at_step, original_sigmas, out_denoised, out)
-            ui_obj = SamplerCustomAdvancedEfficient.define_preview(False, preview_method, latent_to_use, None)
+            # -----------------------------------------------------------------------
+                        
+            # Decode image if not yet decoded
+            if images is None and "true" in vae_decode:
+                images = video_vae_decode_latent(video_vae, latent_to_use, vae_decode)
+            # Define a dummy output image
+            if images is None and vae_decode == "false":
+                images = list()
+
+            has_images = images is not None and len(images) > 0
+            ui_obj = SamplerCustomAdvancedEfficient.define_preview(has_images, preview_method, latent_to_use, images)
+            
+            # Decode audio if not yet decoded
+            if "true" in audio_decode and latent_to_use["samples"].is_nested and audio is None:
+                audio = audio_vae_decode_latent(audio_vae, latent_to_use, audio_decode)
+            # Define a dummy output audio
+            if audio is None and audio_decode == "false":
+                audio = list()
 
         finally: # catch errors, exceptions etc
             # Restore global changes
@@ -289,15 +330,16 @@ class H3TiledSamplerCustomAdvanced(io.ComfyNode):
             set_preview_method(previous_preview_method)
             torch.cuda.empty_cache()
 
-        return io.NodeOutput(out, out_denoised, ui=ui_obj)
+        return io.NodeOutput(model, conditioning, sampler, original_sigmas, out, out_denoised, images, audio, video_vae, audio_vae,
+                            ui=ui_obj)
 
 
 SAMPLERS_CLASS_MAPPINGS = {
     "SamplerCustomAdvancedEfficient": SamplerCustomAdvancedEfficient,
-    "H3TiledSamplerCustomAdvanced": H3TiledSamplerCustomAdvanced,
+    "H3TiledSamplerCustomAdvancedEfficient": H3TiledSamplerCustomAdvancedEfficient,
 }
 
 SAMPLERS_NAME_MAPPINGS = {
     "SamplerCustomAdvancedEfficient": "Sampler Custom Advanced (Efficient)",
-    "H3TiledSamplerCustomAdvanced": "H3 Tiled Sampler Custom Advanced",
+    "H3TiledSamplerCustomAdvancedEfficient": "H3 Tiled Sampler Custom Advanced (Efficient)",
 }
