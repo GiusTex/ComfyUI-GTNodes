@@ -128,6 +128,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
         sampler = sampler_object(sampler) if custom_sampler is None else custom_sampler
         # -----------------------------------------------------------------------
 
+        patched = False
         try:
             # Initialize output variables
             images = audio = previous_preview_method = None
@@ -137,7 +138,8 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
             latent_image = latent["samples"]
             if latent_image.is_nested:
                 latent_image = latent_image.unbind()[0]
-            patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)
+            if preview_method == "taeh3":
+                patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)
             set_preview_method(preview_method)
 
             (latent, denoised_latent) = SamplerCustomAdvanced().execute(
@@ -270,13 +272,15 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
         guider.set_conds(conditioning)
         sampler = sampler_object(sampler) if custom_sampler is None else custom_sampler
 
+        patched = False
         try:
             # Initialize output variables
             images = audio = previous_preview_method = None
             previous_preview_method = args.preview_method
             previous_previewer = latent_preview.get_previewer
 
-            patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)
+            if preview_method == "taeh3":
+                patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)
             set_preview_method(preview_method)
 
             x0_output = {}
