@@ -2,6 +2,7 @@
 A bundle of nodes with different purposes. More info below. Some of those nodes (`SamplerCustomAdvancedEfficient`, `MultiLoraLoader`, ...) exist as an alternative to comfyui's subgraphs, where sometimes the widget values are not passed correctly inside. Some nodes use parts of other auhors nodes, more info below/in the credits.
 
 ### Updates:
+- 13/11/2026: Added standalone `Pad Image GT` node from ComfyUI-Diffusers-Image-Outpaint.
 - 10/11/2026: Converted `H3 Tiled Sampler Custom Advanced` into `H3 Tiled Sampler Custom Advanced (Efficient)`.
 - 8/11/2026: Added `taeh3` preview method and `H3 Tiled Sampler Custom Advanced` node.
 - 31/08/2026: Added `MultiLoraLoader` and `MultiLoraLoaderAdvanced`.
@@ -78,6 +79,12 @@ To use `taeh3` preview method, as said in the previous node, kijai's [taeh3 vae]
 
 This tiled sampler is useful if you upscaled an image/video, for example with the ComfyUI's native `MiniMax H3 Latent Upscale With Model` node (example upscale model in "Suggested resources"), the sampler then returns a dict, so you have to use `Separate AV Latent` node to get the video.
 
+**Pad Image GT**:
+
+<img width="293" height="364" alt="image" src="https://github.com/user-attachments/assets/e38b6fd1-b40a-4dd0-b25b-a5278605e897" />
+
+Standalone node to pad images from my other repository ComfyUI-Diffusers-Image-Outpaint based on fffiloni.
+
 **Scheduled CFG Guider** (with its **CFG Float List Scheduler**):
 
 <img width="378" height="221" alt="Scheduled Cfg Guider" src="https://github.com/user-attachments/assets/821528e5-49b3-4016-bce9-b6d49f885136" />
@@ -95,4 +102,5 @@ This tiled sampler is useful if you upscaled an image/video, for example with th
 - WASasquatch/was-node-suite-comfyui, for his [`H3TiledSampler`](https://github.com/WASasquatch/was-node-suite-comfyui/blob/cc9e1fb34155086c094209b8c7793c382b4f8d0a/nodes/sampling/h3_tiled_sampler.py#L78) and his 3 modules (h3_low_vram.py, h3_tiles.py, preview.py) which still fills most of the `H3 Tiled Sampler Custom Advanced`;
 - jlucasmcrell/ComfyUI-H3-Multishot, whose [`_build_decoder`](https://github.com/jlucasmcrell/ComfyUI-H3-Multishot/blob/d7d197709fc93c1afb125e3db1dfd4ac0ae28c60/h3_tae_decode.py#L20) is used to build the taeh3 decoder;
 - Kosinkadink/ComfyUI-VideoHelperSuite, whose `decode_latent_to_preview_image` and `process_previews` are patched from ([link](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite/blob/main/videohelpersuite/latent_preview.py#L18));
+- capitan01R/[ComfyUI-SigmaSync-LoRA](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA) for his lora weight scheduling method based on sigmas;
 - Claude for helping creating and debugging the code.

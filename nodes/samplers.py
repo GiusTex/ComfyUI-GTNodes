@@ -48,7 +48,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
                 io.Conditioning.Input("positive", optional=True, tooltip="Not required if a guider is provided"),   
                 io.Guider.Input("custom_guider", optional=True, tooltip="Custom guider to use instead of the default comfyui's CFG Guider. If no guider is connected, a positive and negative must be provided"),
                 io.Sampler.Input("custom_sampler", optional=True, tooltip="Custom sampler to use instead of the default comfyui samplers"),
-                io.Vae.Input("video_vae", optional=True, tooltip="Required only for previews with \"auto\" option and vae_decode"),
+                io.Vae.Input("vae", optional=True, tooltip="Required only for previews with \"auto\" option and vae_decode"),
                 io.Vae.Input("audio_vae", optional=True, tooltip="Required only for vae_decode with models generating audio"),
                 io.Boolean.Input("add_noise", default=True),
                 io.Int.Input("noise_seed", default=0, min=0, max=0xffffffffffffffff, control_after_generate=True),
@@ -80,7 +80,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
                 io.Latent.Output(display_name="denoised latent"),
                 io.Image.Output(display_name="images"),
                 io.Audio.Output(display_name="audio"),
-                io.Vae.Output(display_name="video_vae"),
+                io.Vae.Output(display_name="vae"),
                 io.Vae.Output(display_name="audio_vae"),
             ],
         )
@@ -104,14 +104,12 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
         return ui_obj
 
     @classmethod
-    def execute(cls, add_noise, noise_seed, sampler, use_cfg, sigmas, latent, start_at_step, end_at_step, preview_method, vae_decode, audio_decode, model=(None), cfg=None, positive=None, custom_guider=None, custom_sampler=None, video_vae=(None), audio_vae=(None)):
+    def execute(cls, add_noise, noise_seed, sampler, use_cfg, sigmas, latent, start_at_step, end_at_step, preview_method, vae_decode, audio_decode, model=(None), cfg=None, positive=None, custom_guider=None, custom_sampler=None, vae=None, audio_vae=None):
         # If vae is not connected, disable vae decoding
-        if video_vae == (None,) and vae_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No video_vae input detected, proceeding as if vae_decode was false.\n")
-            vae_decode = "false"
-        if audio_vae == (None,) and audio_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio_vae input detected, proceeding as if audio_decode was false.\n")
-            audio_decode = "false"
+        if vae is None and vae_decode != "false":
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No image/video vae input detected")
+        if audio_vae is None and audio_decode != "false":
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio vae input detected")
         
         noise = Noise_RandomNoise(noise_seed) if add_noise else Noise_EmptyNoise()
         original_sigmas, sigmas = process_sigmas(sigmas, end_at_step, start_at_step)
@@ -127,7 +125,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
         guider = check_guider(model, custom_guider, cfg, positive, negative)
         sampler = sampler_object(sampler) if custom_sampler is None else custom_sampler
         # -----------------------------------------------------------------------
-
+        
         patched = False
         try:
             # Initialize output variables
@@ -151,7 +149,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
 
             # Decode image if not yet decoded
             if images is None and "true" in vae_decode:
-                images = video_vae_decode_latent(video_vae, latent_to_use, vae_decode)
+                images = video_vae_decode_latent(vae, latent_to_use, vae_decode)
             # Define a dummy output image
             if images is None and vae_decode == "false":
                 images = list()
@@ -174,7 +172,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
             set_preview_method(previous_preview_method)
             torch.cuda.empty_cache()
 
-        return io.NodeOutput(model, positive, negative, sampler, original_sigmas, latent, denoised_latent, images, audio, video_vae, audio_vae,
+        return io.NodeOutput(model, positive, negative, sampler, original_sigmas, latent, denoised_latent, images, audio, vae, audio_vae,
                             ui=ui_obj)
 
 
@@ -237,7 +235,7 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
         )
     
     @classmethod
-    def execute(cls, model, sigmas, seed, sampler, conditioning, latent, start_at_step, end_at_step, tile_width, tile_height, overlap, window_frames, window_overlap, preview_method, vae_decode, audio_decode, video_vae=(None), audio_vae=(None), custom_sampler=None):
+    def execute(cls, model, sigmas, seed, sampler, conditioning, latent, start_at_step, end_at_step, tile_width, tile_height, overlap, window_frames, window_overlap, preview_method, vae_decode, audio_decode, video_vae=None, audio_vae=None, custom_sampler=None):
         latent_dict = latent["samples"]
         if model.model.diffusion_model.__class__.__name__ == "MiniMaxH3ImageModel":
             latent_image = latent_dict
@@ -248,12 +246,10 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
                 raise ValueError("[H3 Tiled Sampler] MiniMaxH3/P-H3-Image model detected, but the latent is not nested, use \"Concat AV Latent\" node to pass a video/image + audio nested latent. Or use MiniMaxH3-Image")
 
         # If vae is not connected, disable vae decoding
-        if video_vae == (None,) and vae_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No video_vae input detected, proceeding as if vae_decode was false.\n")
-            vae_decode = "false"
-        if audio_vae == (None,) and audio_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio_vae input detected, proceeding as if audio_decode was false.\n")
-            audio_decode = "false"
+        if video_vae is None and vae_decode != "false":
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No video vae input detected")
+        if audio_vae is None and audio_decode != "false":
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio vae input detected")
         
         starts = scene_starts(latent_image)
         settings = tiling_settings(tile_width, tile_height, overlap, window_frames, window_overlap)
