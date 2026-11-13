@@ -107,11 +107,9 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
     def execute(cls, add_noise, noise_seed, sampler, use_cfg, sigmas, latent, start_at_step, end_at_step, preview_method, vae_decode, audio_decode, model=(None), cfg=None, positive=None, custom_guider=None, custom_sampler=None, vae=None, audio_vae=None):
         # If vae is not connected, disable vae decoding
         if vae is None and vae_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No image/video vae input detected, proceeding as if vae_decode was false.\n")
-            vae_decode = "false"
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No image/video vae input detected")
         if audio_vae is None and audio_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio_vae input detected, proceeding as if audio_decode was false.\n")
-            audio_decode = "false"
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio vae input detected")
         
         noise = Noise_RandomNoise(noise_seed) if add_noise else Noise_EmptyNoise()
         original_sigmas, sigmas = process_sigmas(sigmas, end_at_step, start_at_step)
@@ -249,11 +247,9 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
 
         # If vae is not connected, disable vae decoding
         if video_vae is None and vae_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No video vae input detected, proceeding as if vae_decode was false.\n")
-            vae_decode = "false"
-        if audio_vae == (None,) and audio_decode != "false":
-            print(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio_vae input detected, proceeding as if audio_decode was false.\n")
-            audio_decode = "false"
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No video vae input detected")
+        if audio_vae is None and audio_decode != "false":
+            raise ValueError(f"{warning('Sampler Custom Advanced Efficient Warning:')} No audio vae input detected")
         
         starts = scene_starts(latent_image)
         settings = tiling_settings(tile_width, tile_height, overlap, window_frames, window_overlap)
