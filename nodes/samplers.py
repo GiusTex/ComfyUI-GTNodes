@@ -67,8 +67,8 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
                     "\"taeh3\" previews have been tested both with single image and video generation. Decode tests (on a rtx 3060 12gb):\n"
                     "- 8 seconds, 448x704: the sampler stopped each step for 1.3 seconds;\n"
                     "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds")),
-                io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
-                io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
+                io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], default="true", tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
+                io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], default="false", tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
             ],
             outputs=[
                 io.Model.Output(display_name="model"), 
@@ -217,8 +217,8 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
                     "\"taeh3\" previews have been tested both with single image and video generation. Decode tests (on a rtx 3060 12gb):\n"
                     "- 8 seconds, 448x704: the sampler stopped each step for 1.3 seconds;\n"
                     "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds")),
-                io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
-                io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
+                io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], default="true", tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
+                io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], default="false", tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
             ],
             outputs=[
                 io.Model.Output(display_name="model"), 
