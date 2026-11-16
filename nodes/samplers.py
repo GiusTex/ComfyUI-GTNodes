@@ -58,7 +58,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
                 ),
                 io.Int.Input("start_at_step", default=0, min=0, max=10000),
                 io.Int.Input("end_at_step", default=10000, min=0, max=10000),
-                io.Combo.Input("preview_method", options=["auto", "latent2rgb", "taesd", "taeh3", "vae_decoded_only", "none"], default="latent2rgb", 
+                io.Combo.Input("preview_method", options=["auto", "latent2rgb", "taesd", "taeh3", "taeh3_image", "vae_decoded_only", "none"], default="latent2rgb", 
                     tooltip=("\"taeh3\" requires \"taeh3.safetensors\" in models/vae_approx, "
                     "from kijai, and sets \"max_preview_resolution\" at 1024.\n"
                     "The animated preview requires https://github.com/kosinkadink/ComfyUI-VideoHelperSuite, "
@@ -66,7 +66,8 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
                     "You can also change video preview's fps here. For a single image VHS is not required.\n"
                     "\"taeh3\" previews have been tested both with single image and video generation. Decode tests (on a rtx 3060 12gb):\n"
                     "- 8 seconds, 448x704: the sampler stopped each step for 1.3 seconds;\n"
-                    "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds")),
+                    "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds.\n"
+                    "\"taeh3_image\" instead requires \"taeh3_image.safetensors\", always from kijai, in models/vae_approx, and \"max_preview_resolution\" is capped at 2048 px.")),
                 io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], default="true", tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
                 io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], default="false", tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
             ],
@@ -88,7 +89,8 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
     @classmethod
     def define_preview(cls, has_images, preview_method, latent_to_use, images):
         ui_obj = None
-        if not has_images and preview_method == "taeh3":
+        #if not has_images and preview_method == "taeh3":
+        if not has_images and preview_method in ["taeh3", "taeh3_image"]:
             samples = latent_to_use["samples"]
             if samples.is_nested:
                 samples = samples.tensors[0]
@@ -131,13 +133,16 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
             # Initialize output variables
             images = audio = previous_preview_method = None
             previous_preview_method = args.preview_method
+            # H3: 1024, H3-Image: checked and set later
+            args.max_taeh3_preview_res = 1024
             previous_previewer = latent_preview.get_previewer
 
             latent_image = latent["samples"]
             if latent_image.is_nested:
                 latent_image = latent_image.unbind()[0]
-            if preview_method == "taeh3":
-                patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)
+            #if preview_method == "taeh3":
+            if preview_method in ["taeh3", "taeh3_image"]:
+                patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)                
             set_preview_method(preview_method)
 
             (latent, denoised_latent) = SamplerCustomAdvanced().execute(
@@ -168,6 +173,7 @@ class SamplerCustomAdvancedEfficient(io.ComfyNode):
             # Restore global changes
             if patched:
                 patch_vhs(False, wrapped_previewer)
+            del args.max_taeh3_preview_res
             latent_preview.get_previewer = previous_previewer
             set_preview_method(previous_preview_method)
             torch.cuda.empty_cache()
@@ -208,7 +214,7 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
                 io.Int.Input("overlap", default=128, min=32, max=4096, step=32, tooltip="Pixels neighbouring tiles share, as `128`."),
                 io.Int.Input("window_frames", default=0, min=0, max=10000, step=1, tooltip="Frames a time window spans, as `141`, or `0` for the whole clip or a single image.",),
                 io.Int.Input("window_overlap", default=17, min=1, max=1000, step=1, tooltip="Frames neighbouring time windows share, as `17` for a video or `1` for a single image."),
-                io.Combo.Input("preview_method", ["auto", "latent2rgb", "taeh3", "none"], default="taeh3", 
+                io.Combo.Input("preview_method", ["auto", "latent2rgb", "taeh3", "taeh3_image", "none"], default="taeh3", 
                     tooltip=("\"taeh3\" requires \"taeh3.safetensors\" in models/vae_approx, "
                     "from kijai, and sets \"max_preview_resolution\" at 1024.\n"
                     "The animated preview requires https://github.com/kosinkadink/ComfyUI-VideoHelperSuite, "
@@ -216,7 +222,8 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
                     "You can also change video preview's fps here. For a single image VHS is not required.\n"
                     "\"taeh3\" previews have been tested both with single image and video generation. Decode tests (on a rtx 3060 12gb):\n"
                     "- 8 seconds, 448x704: the sampler stopped each step for 1.3 seconds;\n"
-                    "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds")),
+                    "- 8 seconds, 576x832: the sampler stopped each step for 2.1 seconds.\n"
+                    "\"taeh3_image\" instead requires \"taeh3_image.safetensors\", always from kijai, in models/vae_approx, and \"max_preview_resolution\" is capped at 2048 px.")),
                 io.Combo.Input("vae_decode", options=["true", "true (tiled)", "false"], default="true", tooltip="Automatically decodes the denoised image/video latent.\n-true: forces image/video decoding;\n-true (tiled): forces image/video decoding using tiles\n-false: disables video decoding."),
                 io.Combo.Input("audio_decode", options=["true", "true (tiled)", "false"], default="false", tooltip="Automatically decodes the denoised audio latent.\n-true: forces audio decoding;\n-true (tiled): forces audio decoding using tiles\n-false: disables audio decoding"),
             ],
@@ -273,9 +280,12 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
             # Initialize output variables
             images = audio = previous_preview_method = None
             previous_preview_method = args.preview_method
+            # H3: 1024, H3-Image: checked and set later
+            args.max_taeh3_preview_res = 1024
             previous_previewer = latent_preview.get_previewer
 
-            if preview_method == "taeh3":
+            #if preview_method == "taeh3":
+            if preview_method in ["taeh3", "taeh3_image"]:
                 patched, wrapped_previewer = check_eligibility_to_patch(latent_image, preview_method)
             set_preview_method(preview_method)
 
@@ -329,6 +339,7 @@ class H3TiledSamplerCustomAdvancedEfficient(io.ComfyNode):
             # Restore global changes
             if patched:
                 patch_vhs(False, wrapped_previewer)
+            del args.max_taeh3_preview_res
             latent_preview.get_previewer = previous_previewer
             set_preview_method(previous_preview_method)
             torch.cuda.empty_cache()
