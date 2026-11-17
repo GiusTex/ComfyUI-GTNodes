@@ -2,6 +2,7 @@
 A bundle of nodes with different purposes. More info below. Some of those nodes (`SamplerCustomAdvancedEfficient`, `MultiLoraLoader`, ...) exist as an alternative to comfyui's subgraphs, where sometimes the widget values are not passed correctly inside. Some nodes use parts of other auhors nodes, more info below/in the credits.
 
 ### Updates:
+- 17/11/2026: Added `taeh3_image` preview method.
 - 13/11/2026: Added standalone `Pad Image GT` node from ComfyUI-Diffusers-Image-Outpaint.
 - 10/11/2026: Converted `H3 Tiled Sampler Custom Advanced` into `H3 Tiled Sampler Custom Advanced (Efficient)`.
 - 8/11/2026: Added `taeh3` preview method and `H3 Tiled Sampler Custom Advanced` node.
@@ -17,8 +18,9 @@ A bundle of nodes with different purposes. More info below. Some of those nodes 
 To install ComfyUI-GTNodes, follow these steps:
 - Go in the ComfyUI `custom_nodes` folder, then download the repository or clone it here: `git clone https://github.com/GiusTex/ComfyUI-GTNodes`.
 - Optional: install [ComfyUI-SigmaSync](https://github.com/capitan01R/ComfyUI-SigmaSync-LoRA#installation) if you want to use `Multi Lora Loader Advanced`.
-- Optional: download kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) in `models/vae_approx` to use `taeh3` single image preview method;
-- Optional: install Kosinkadink/[ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite) (+ kijai's taeh3 vae) to animate H3 video previews;
+- Optional: download kijai's [taeh3 tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) in `models/vae_approx` to use `taeh3` video/image preview method (up to 1024px);
+- Optional: download kijai's [taeh3 image tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3_image.safetensors) in `models/vae_approx` to use `taeh3_image` single image preview method (up to 2048px);
+- Optional: install Kosinkadink/[ComfyUI-VideoHelperSuite](https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite) (+ kijai's taeh3 tiny vae) to animate H3 video previews;
 - Restart ComfyUI.
 
 ### Nodes:
@@ -56,7 +58,7 @@ Supports:
 - Decoding of images/audio, when one or both are available (the node auto-checks what is available in the latent).
 - Embedded preview for MiniMax H3, using `taeh3` preview method. `Max_preview_resolution` is hardcoded at 1024 (instead of 512 like in default ComfyUI, anyway only greater inputs will be resized).
 
-  Requires kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) in `models/vae_approx`.
+  Requires kijai's [taeh3 tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) in `models/vae_approx`.
 
   Requires an H3 latent dict (image/video + audio), and works both with a single image or a video. For the single image you can use `P-H3-Image Conditioning` node, that returns a latent dict of image + audio, then their H3 image vae or another custom image vae (link in "Suggested resources").
 
@@ -67,6 +69,10 @@ Supports:
   - video of 8 seconds, size of 448x704: the sampler stopped each step for 1.3 seconds;
   - video of 8 seconds, size of 576x832: the sampler stopped each step for 2.1 seconds.
 
+- Embedded preview for MiniMax H3-Image, using `taeh3_image` preview method. `Max_preview_resolution` is hardcoded at 2048.
+
+  Requires kijai's [taeh3 image tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3_image.safetensors) in `models/vae_approx`.
+
 **H3 Tiled Sampler Custom Advanced (Efficient)**:
 
 <img width="286" height="428" alt="image" src="https://github.com/user-attachments/assets/23982067-86a6-4677-9e2b-26705bdf85c5" />
@@ -75,7 +81,9 @@ An edit of was-node-suite-comfyui's `H3 Tiled Sampler`, to let it accept custom 
 
 Requires an H3 latent dict (image/video + audio), and works both with a single image or a video, check `Sampler Custom Advanced (Efficient)` for more info.
 
-To use `taeh3` preview method, as said in the previous node, kijai's [taeh3 vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) is required in `models/vae_approx`; more info on this and turning on animated video preview above.
+To use `taeh3` preview method, as said in the previous node, kijai's [taeh3 tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) is required in `models/vae_approx`; more info on this and turning on animated video preview above.
+
+To use `taeh3_image` preview method, as said in the previous node, kijai's [taeh3 image tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3_image.safetensors) is required in `models/vae_approx`; more info on this above.
 
 This tiled sampler is useful if you upscaled an image/video, for example with the ComfyUI's native `MiniMax H3 Latent Upscale With Model` node (example upscale model in "Suggested resources"), the sampler then returns a dict, so you have to use `Separate AV Latent` node to get the video.
 
