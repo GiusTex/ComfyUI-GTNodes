@@ -56,7 +56,7 @@ Supports:
 - use of only positive, useful when sampling with cfg 1 and/or the negative isn't required;
 - use of optional custom samplers, schedulers and guiders. Connect and use them, or bypass/leave their input slots empty to use the corresponding default widgets. Default guiders: `CFG Guider` when `use_cfg` is `True`, `Basic Guider` when `False`.
 - Decoding of images/audio, when one or both are available (the node auto-checks what is available in the latent).
-- Embedded preview for MiniMax H3, using `taeh3` preview method. `Max_preview_resolution` is hardcoded at 1024 (instead of 512 like in default ComfyUI, anyway only greater inputs will be resized).
+- Embedded preview for MiniMax H3, using `taeh3` preview method. `Max_preview_resolution` is hardcoded at 1024px (instead of 512 like in default ComfyUI, anyway only greater inputs will be resized).
 
   Requires kijai's [taeh3 tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3.safetensors) in `models/vae_approx`.
 
@@ -69,7 +69,7 @@ Supports:
   - video of 8 seconds, size of 448x704: the sampler stopped each step for 1.3 seconds;
   - video of 8 seconds, size of 576x832: the sampler stopped each step for 2.1 seconds.
 
-- Embedded preview for MiniMax H3-Image, using `taeh3_image` preview method. `Max_preview_resolution` is hardcoded at 2048.
+- Embedded preview for MiniMax H3-Image, using `taeh3_image` preview method. `Max_preview_resolution` is hardcoded at 2048px.
 
   Requires kijai's [taeh3 image tiny vae](https://huggingface.co/Kijai/MiniMax-H3-TAE/blob/main/vae_approx/taeh3_image.safetensors) in `models/vae_approx`.
 
