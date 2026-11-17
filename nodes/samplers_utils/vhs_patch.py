@@ -3,18 +3,15 @@ import torch.nn.functional as F
 from PIL import Image
 
 import latent_preview
+from comfy.cli_args import args
 
 import server
 from io import BytesIO
 import struct
 import time
 
-from ..samplers_utils.h3_tae import H3TaePreviewer, MAX_RESOLUTION
+from ..samplers_utils.h3_tae import H3TaePreviewer
 
-
-# --------------------- VHS Animated Preview Patch -----------------
-_VHS_ORIG = {}
-rate = 8 # as default in VHS's "Playback rate override"
 
 try:
     previewers = list(latent_preview.LatentPreviewer.__subclasses__())
@@ -23,6 +20,8 @@ try:
             VHS_WRAPPER = previewer
 except:
     None
+
+_VHS_ORIG = {}
 
 # decode_latent_to_preview_image and process_previews copied from WrappedPreviewer in Kosinkadink/ComfyUI-VideoHelperSuite: https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite/blob/main/videohelpersuite/latent_preview.py#L18
 # and patched to accept H3TaePreviewer and MAX_RESOLUTION
@@ -72,6 +71,7 @@ def patch_vhs(on, wrapped_previewer):
 
     def process_previews(self, image_tensor, ind, leng):
         image_tensor = self.decode_latent_to_preview(image_tensor) # [n,H,W,3], -1..1
+        MAX_RESOLUTION = args.max_taeh3_preview_res
         if image_tensor.size(1) > MAX_RESOLUTION or image_tensor.size(2) > MAX_RESOLUTION:
             image_tensor = image_tensor.movedim(-1, 0)
             if image_tensor.size(2) < image_tensor.size(3):
@@ -104,11 +104,17 @@ def get_h3_tae_previewer(device, latent_format):
     return H3TaePreviewer()
 
 def get_wrapped_h3_tae_previewer(device, latent_format):
+    extra = next(iter(server.PromptServer.instance.prompt_queue.currently_running.values()))[3]['extra_pnginfo']['workflow']['extra']
+    rate = extra.get('VHS_latentpreviewrate', 8)
     return VHS_WRAPPER(H3TaePreviewer(), rate)
 
 def check_eligibility_to_patch(latent_image, preview_method):
     B, C, T, H, W = latent_image.shape
-    if T > 1 and preview_method == "taeh3": # a video (t>1) to be animated
+    # MiniMax-H3 (t>1)
+    # This branch calls the full decoder (taeh3.sft), so we'll keep
+    # max preview res at 1024 even if get_h3_tae_previewer (img previewer) 
+    # could be called in 2 cases
+    if T > 1 and preview_method == "taeh3":
         if VHS_WRAPPER: # if installed, patch
             extra = next(iter(server.PromptServer.instance.prompt_queue.currently_running.values()))[3]['extra_pnginfo']['workflow']['extra']
             active = extra.get('VHS_latentpreview', False)
@@ -117,8 +123,6 @@ def check_eligibility_to_patch(latent_image, preview_method):
                 latent_preview.get_previewer = get_h3_tae_previewer
                 return False, None
             
-            global rate
-            rate = extra.get('VHS_latentpreviewrate', 0)
             print(f"[ComfyUI-GTNodes] Patching VHS's WrappedPreviewer: {VHS_WRAPPER.__module__}")
             patch_vhs(True, VHS_WRAPPER)
             latent_preview.get_previewer = get_wrapped_h3_tae_previewer
@@ -126,6 +130,13 @@ def check_eligibility_to_patch(latent_image, preview_method):
         else:
             print("[ComfyUI-GTNodes] VHS not found, the preview won't be animated")
             latent_preview.get_previewer = get_h3_tae_previewer
-    elif T == 1 and preview_method == "taeh3": # 1 frame (t==1)
+    
+    # P/MiniMax -H3-Image (t=1)
+    # This branch calls the image decoder (taeh3_image.sft), built to
+    # support larger previews (the 3 exit-heads turn on respectively at: 
+    # 2048, 4096, 8192. Under 2048 the exit heads do not activate). 
+    # Let's keep 2048
+    elif T == 1 and preview_method == "taeh3_image":
+        args.max_taeh3_preview_res = 2048
         latent_preview.get_previewer = get_h3_tae_previewer
     return False, None
